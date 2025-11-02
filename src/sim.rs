@@ -415,9 +415,6 @@ pub struct Body {
 
 #[derive(Component)]
 pub struct Player {
-    pub thrust: f32,
-    pub torque: f32,
-    pub alive: bool,
     pub prev_class: Class,
     pub score: f32,
 }
@@ -629,9 +626,6 @@ pub fn spawn_player(mut commands: Commands) {
             target_radius: Class::radius_for_mass(mass),
         },
         Player {
-            thrust: 380.0,
-            torque: 0.0,
-            alive: true,
             prev_class: class,
             score: 0.0,
         },

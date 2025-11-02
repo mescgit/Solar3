@@ -15,8 +15,6 @@ fn main() {
     App::new()
         .insert_resource(ClearColor(Color::srgb(0.02, 0.02, 0.04)))
         .insert_resource(Msaa::Sample4)
-        .init_state::<SimState>()
-        .init_state::<AppState>()
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(EntityCountDiagnosticsPlugin)
         .add_plugins(DefaultPlugins.set(WindowPlugin {

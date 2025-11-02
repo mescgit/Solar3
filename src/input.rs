@@ -144,10 +144,10 @@ fn drag_spawn(
 fn player_thrust(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
-    mut q: Query<(&mut Body, &Transform, &mut Player)>,
+    mut players: Query<&mut Body, With<Player>>,
 ) {
     let dt = time.delta_seconds();
-    if let Ok((mut b, _t, _p)) = q.get_single_mut() {
+    if let Ok(mut body) = players.get_single_mut() {
         let mut dir = Vec2::ZERO;
 
         if keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW) {
