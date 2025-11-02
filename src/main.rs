@@ -25,8 +25,6 @@ fn main() {
             }),
             ..default()
         }))
-        .init_state::<SimState>()
-        .init_state::<AppState>()
         .add_plugins((SimPlugin, UiPlugin, InputPlugin))
         .add_systems(Startup, setup_camera)
         .run();

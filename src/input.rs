@@ -18,7 +18,6 @@ impl Plugin for InputPlugin {
                 time_scale_toggle,
                 reset_trigger,
                 help_toggle,
-                diagnostics_toggle,
             ),
         );
     }
@@ -170,8 +169,8 @@ fn player_thrust(
             } else {
                 1.0
             };
-            let acc = dir.normalize() * 380.0 * boost / body.mass.max(1.0);
-            body.vel += acc * dt;
+            let acc = dir.normalize() * 380.0 * boost / b.mass.max(1.0);
+            b.vel += acc * dt;
         }
     }
 }
