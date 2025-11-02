@@ -1,8 +1,13 @@
+use bevy::diagnostic::{
+    DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
+};
 use bevy::prelude::*;
-use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin, EntityCountDiagnosticsPlugin};
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 
-use crate::sim::{Body, Player, SimSettings, SimStats, CollisionMode, SimState, ColorPalette, Mission, Objective, ResetEvent, AppState, SystemType};
+use crate::domain::simulation::{
+    AppState, Body, CollisionMode, ColorPalette, Mission, Objective, Player, ResetEvent, Scenario,
+    SimSettings, SimState, SimStats, SystemType,
+};
 
 pub struct UiPlugin;
 impl Plugin for UiPlugin {
@@ -33,9 +38,7 @@ fn ui_system(
         if let Ok((body, player)) = player_q.get_single() {
             ui.label(format!(
                 "Player — Mass: {:.1}  Class: {:?}  Score: {:.0}",
-                body.mass,
-                body.class,
-                player.score
+                body.mass, body.class, player.score
             ));
         }
 
@@ -46,8 +49,7 @@ fn ui_system(
                 Objective::Survive => {
                     ui.label(format!(
                         "Survive: {:.0} / {:.0}s",
-                        mission.progress,
-                        mission.goal
+                        mission.progress, mission.goal
                     ));
                 }
                 _ => {}
@@ -67,11 +69,7 @@ fn ui_system(
         egui::ComboBox::from_label("Scenario")
             .selected_text(format!("{:?}", settings.scenario))
             .show_ui(ui, |ui| {
-                ui.selectable_value(
-                    &mut settings.scenario,
-                    Scenario::CalmBelts,
-                    "Calm Belts",
-                );
+                ui.selectable_value(&mut settings.scenario, Scenario::CalmBelts, "Calm Belts");
                 ui.selectable_value(
                     &mut settings.scenario,
                     Scenario::BinaryMayhem,
@@ -82,11 +80,7 @@ fn ui_system(
                     Scenario::StarNursery,
                     "Star Nursery",
                 );
-                ui.selectable_value(
-                    &mut settings.scenario,
-                    Scenario::BHArena,
-                    "BH Arena",
-                );
+                ui.selectable_value(&mut settings.scenario, Scenario::BHArena, "BH Arena");
             });
 
         ui.separator();
@@ -104,11 +98,7 @@ fn ui_system(
                     SystemType::BinaryStar,
                     "Binary Star",
                 );
-                ui.selectable_value(
-                    &mut settings.system_type,
-                    SystemType::Cluster,
-                    "Cluster",
-                );
+                ui.selectable_value(&mut settings.system_type, SystemType::Cluster, "Cluster");
             });
 
         ui.separator();
@@ -131,7 +121,10 @@ fn ui_system(
 
         ui.separator();
 
-        if ui.checkbox(&mut settings.deterministic, "Deterministic").changed() {
+        if ui
+            .checkbox(&mut settings.deterministic, "Deterministic")
+            .changed()
+        {
             if settings.deterministic {
                 next_state.set(SimState::Sequential);
             } else {
@@ -161,12 +154,8 @@ fn ui_system(
 
         ui.checkbox(&mut settings.adaptive_theta, "Adaptive Theta");
         if settings.adaptive_theta {
-            ui.add(
-                egui::Slider::new(&mut settings.theta_range.x, 0.0..=1.0).text("Theta Min"),
-            );
-            ui.add(
-                egui::Slider::new(&mut settings.theta_range.y, 0.0..=2.0).text("Theta Max"),
-            );
+            ui.add(egui::Slider::new(&mut settings.theta_range.x, 0.0..=1.0).text("Theta Min"));
+            ui.add(egui::Slider::new(&mut settings.theta_range.y, 0.0..=2.0).text("Theta Max"));
         } else {
             ui.add(egui::Slider::new(&mut settings.theta, 0.0..=2.0).text("Theta"));
         }
@@ -210,7 +199,8 @@ fn ui_system(
                     ui.label(format!("FPS: {:.1}", value));
                 }
             }
-            if let Some(entity_count) = diagnostics.get(&EntityCountDiagnosticsPlugin::ENTITY_COUNT) {
+            if let Some(entity_count) = diagnostics.get(&EntityCountDiagnosticsPlugin::ENTITY_COUNT)
+            {
                 if let Some(value) = entity_count.value() {
                     ui.label(format!("Entities: {}", value));
                 }

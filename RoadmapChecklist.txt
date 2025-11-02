@@ -1,139 +1,141 @@
 v1.0 Roadmap (Solar2-rs)
 Milestone 0 — Current Prototype ✅
 
-Barnes-Hut gravity + belts render
+Team-specific breakdowns live in `docs/roadmaps/` for simulation, controls, and presentation owners.
 
-Player body with thrust controls
+✅ Barnes-Hut gravity + belts render
 
-    Collision/absorption stable at 2k bodies
+✅ Player body with thrust controls
+
+✅ Collision/absorption stable at 2k bodies
 
 Milestone 1 — Core Sim Polish (P0)
 
-Upgrade integrator to full leapfrog (kick–drift–kick in 2 systems; cap velocity)
+✅ Upgrade integrator to full leapfrog (kick–drift–kick in 2 systems; cap velocity)
 Done when: energy drift over 30s < 2% at default dt.
 
-Adaptive softening & theta (scale with local density; UI sliders)
+✅ Adaptive softening & theta (scale with local density; UI sliders)
 Done when: belts remain coherent across zoom levels.
 
-Collision modes: absorb vs. elastic (restitution in settings)
+✅ Collision modes: absorb vs. elastic (restitution in settings)
 Done when: toggle works; elastic conserves momentum within 2%.
 
-Spatial hash tune (cell size auto = ~2× mean radius)
+✅ Spatial hash tune (cell size auto = ~2× mean radius)
 Done when: 10k bodies @ 60 FPS on 4090 at 1400×900.
 
-    Determinism toggle (fixed seed; single-thread simulation set)
+✅ Determinism toggle (fixed seed; single-thread simulation set)
     Done when: identical replay hashes for 60s runs.
 
 Milestone 2 — Camera & Input (P0)
 
-Camera follow (toggle F) with smooth lerp + right-drag pan override
+✅ Camera follow (toggle F) with smooth lerp + right-drag pan override
 
-Zoom to cursor (world-space) with min/max scale clamps
+✅ Zoom to cursor (world-space) with min/max scale clamps
 
-Time controls: Space (pause), [/] (0.5×/1×/2×/4× sim rate), R (reset)
+✅ Time controls: Space (pause), [/] (0.5×/1×/2×/4× sim rate), R (reset)
 
-    Keybinds in settings (simple map; show in HUD)
+🟡 Keybinds in settings (simple map; show in HUD)
 
 Milestone 3 — Visuals & UX (P1)
 
-Trails (low-alpha particles; lifespan/step configurable)
+🟡 Trails (low-alpha particles; lifespan/step configurable)
 
-Glow/bloom: material or post-process; class-based color & alpha
+✅ Glow/bloom: material or post-process; class-based color & alpha
 
-Scale sprites by mass with smooth size animation
+✅ Scale sprites by mass with smooth size animation
 
 UI/HUD:
 
-    bodies, player mass/class, sim rate, FPS
+    ✅ bodies, player mass/class, sim rate, FPS
 
-    mini help (controls), toggle with H
+    ✅ mini help (controls), toggle with H
 
-    Colorblind-safe palette (switchable)
+    ✅ Colorblind-safe palette (switchable)
 
 Milestone 4 — Gameplay Loop (P0)
 
-Growth tiers: Asteroid → Planet → Star → Black Hole (class thresholds)
+✅ Growth tiers: Asteroid → Planet → Star → Black Hole (class thresholds)
 Done when: sprite/FX and mechanics change at thresholds.
 
-Absorption scoring: +mass, score = absorbed momentum/rarity
+✅ Absorption scoring: +mass, score = absorbed momentum/rarity
 
-Threats/hazards: rogue stars, micro BHs, debris storms (spawn waves)
+✅ Threats/hazards: rogue stars, micro BHs, debris storms (spawn waves)
 
-Objectives/Missions (Solar2-style vibes, minimal content):
+🟡 Objectives/Missions (Solar2-style vibes, minimal content):
 
     survive X seconds, reach class Y, absorb N planets, escort payload
 
-    Win/Lose states: mission success screens; player death → retry
+🟡 Win/Lose states: mission success screens; player death → retry
 
 Milestone 5 — Content & Generation (P1)
 
-Procedural systems: rings, binary stars, clusters (seeded)
+✅ Procedural systems: rings, binary stars, clusters (seeded)
 
-Scenario presets: “Calm Belts”, “Binary Mayhem”, “Star Nursery”, “BH Arena”
+✅ Scenario presets: “Calm Belts”, “Binary Mayhem”, “Star Nursery”, “BH Arena”
 
-    Seed entry UI + “Randomize” button
+⬜ Seed entry UI + “Randomize” button
 
 Milestone 6 — Performance & QA (P0)
 
-10k bodies @ 60 FPS target on 4090; 30 FPS on mid-range GPU
+⬜ 10k bodies @ 60 FPS target on 4090; 30 FPS on mid-range GPU
 
-Frame time budget telemetry (diagnostics overlay; toggle F3)
+✅ Frame time budget telemetry (diagnostics overlay; toggle F3)
 
-Allocator tweak (jemallocator feature flag)
+⬜ Allocator tweak (jemallocator feature flag)
 
-    Hot reload settings (TOML/ron watched; dev-only)
+⬜ Hot reload settings (TOML/ron watched; dev-only)
 
 Milestone 7 — Persistence & Replays (P1)
 
-Save/Load seed + settings + bodies (position/vel/mass/class)
+⬜ Save/Load seed + settings + bodies (position/vel/mass/class)
 
-Short replay capture (circular buffer; export to JSON)
+⬜ Short replay capture (circular buffer; export to JSON)
 
-    Autosave on exit (optional)
+    ⬜ Autosave on exit (optional)
 
 Milestone 8 — Audio & Polish (P2)
 
-Minimal SFX: absorb “pop”, star flare, BH hum (volume sliders)
+⬜ Minimal SFX: absorb “pop”, star flare, BH hum (volume sliders)
 
-UI sounds (toggle)
+⬜ UI sounds (toggle)
 
-    Screen shake on big merges (micro, class-scaled)
+    ⬜ Screen shake on big merges (micro, class-scaled)
 
 Milestone 9 — Menus & Packaging (P0)
 
-Main menu (Play, Scenarios, Options, Quit)
+⬜ Main menu (Play, Scenarios, Options, Quit)
 
-Options: graphics (bloom, trails), controls, gameplay, accessibility
+⬜ Options: graphics (bloom, trails), controls, gameplay, accessibility
 
-Credits
+⬜ Credits
 
-Windows build (MSVC), zipped artifact + version string (SemVer)
+⬜ Windows build (MSVC), zipped artifact + version string (SemVer)
 
-    Crash-safe: panic hook with on-disk dump (dev-only)
+    ⬜ Crash-safe: panic hook with on-disk dump (dev-only)
 
 Milestone 10 — v1.0 Definition (ship checklist)
 
-Stable core sim with leapfrog + BH approximation, 10k@60fps on target HW
+⬜ Stable core sim with leapfrog + BH approximation, 10k@60fps on target HW
 
-Camera follow/zoom, clean HUD, trails, glow/bloom toggle
+🟡 Camera follow/zoom, clean HUD, trails, glow/bloom toggle
 
-Growth tiers + at least 5 objectives playable end-to-end
+⬜ Growth tiers + at least 5 objectives playable end-to-end
 
-Save/Load, basic settings, keybinds
+⬜ Save/Load, basic settings, keybinds
 
-One procedural generator + 3 scenario presets
+🟡 One procedural generator + 3 scenario presets
 
-    Windows release artifact + README + controls/help
+    ⬜ Windows release artifact + README + controls/help
 
 Nice-to-Have (post-1.0)
 
-Steam/itch packaging, achievements
+⬜ Steam/itch packaging, achievements
 
-Mod hooks (load scenarios/settings from folder)
+⬜ Mod hooks (load scenarios/settings from folder)
 
-Photo mode (pause, hide HUD, slow shutter trails)
+⬜ Photo mode (pause, hide HUD, slow shutter trails)
 
-    GPU compute path (wgpu compute kernels) for >50k bodies
+    ⬜ GPU compute path (wgpu compute kernels) for >50k bodies
 
 Order of Operations Suggestion
 
