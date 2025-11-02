@@ -1,8 +1,12 @@
 use crate::domain::simulation::{Body, Player, ResetEvent, SimSettings, SpawnBurst};
 use crate::MainCamera;
 use bevy::input::mouse::{MouseButtonInput, MouseWheel};
+use bevy::input::gamepad::{GamepadConnection, GamepadEvent};
 use bevy::input::ButtonState; // needed in Bevy 0.14
 use bevy::prelude::*;
+
+#[derive(Resource)]
+struct MyGamepad(Gamepad);
 
 pub struct InputPlugin;
 impl Plugin for InputPlugin {
@@ -10,6 +14,7 @@ impl Plugin for InputPlugin {
         app.insert_resource(DragState::default()).add_systems(
             Update,
             (
+                gamepad_connections,
                 camera_controls,
                 drag_spawn,
                 player_thrust,
@@ -146,6 +151,9 @@ fn player_thrust(
     time: Res<Time>,
     keys: Res<ButtonInput<KeyCode>>,
     mut players: Query<&mut Body, With<Player>>,
+    my_gamepad: Option<Res<MyGamepad>>,
+    axes: Res<Axis<GamepadAxis>>,
+    buttons: Res<ButtonInput<GamepadButton>>,
 ) {
     let dt = time.delta_seconds();
     if let Ok(mut player_body) = players.get_single_mut() {
@@ -164,12 +172,38 @@ fn player_thrust(
             dir.x += 1.0;
         }
 
-        if dir != Vec2::ZERO {
-            let boost = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
-                1.75
-            } else {
-                1.0
+        let mut boost = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
+            1.75
+        } else {
+            1.0
+        };
+
+        if let Some(MyGamepad(gamepad)) = my_gamepad.as_deref() {
+            let axis_lx = GamepadAxis {
+                gamepad: *gamepad,
+                axis_type: GamepadAxisType::LeftStickX,
             };
+            let axis_ly = GamepadAxis {
+                gamepad: *gamepad,
+                axis_type: GamepadAxisType::LeftStickY,
+            };
+
+            if let (Some(x), Some(y)) = (axes.get(axis_lx), axes.get(axis_ly)) {
+                dir.x += x;
+                dir.y += y;
+            }
+
+            let boost_button = GamepadButton {
+                gamepad: *gamepad,
+                button_type: GamepadButtonType::South,
+            };
+
+            if buttons.pressed(boost_button) {
+                boost = 1.75;
+            }
+        }
+
+        if dir.length_squared() > 1e-6 {
             let acc = dir.normalize() * 380.0 * boost / player_body.mass.max(1.0);
             player_body.vel += acc * dt;
         }
@@ -213,5 +247,39 @@ fn help_toggle(mut settings: ResMut<SimSettings>, keys: Res<ButtonInput<KeyCode>
 fn diagnostics_toggle(mut settings: ResMut<SimSettings>, keys: Res<ButtonInput<KeyCode>>) {
     if keys.just_pressed(KeyCode::F3) {
         settings.show_diagnostics = !settings.show_diagnostics;
+    }
+}
+
+fn gamepad_connections(
+    mut commands: Commands,
+    my_gamepad: Option<Res<MyGamepad>>,
+    mut evr_gamepad: EventReader<GamepadEvent>,
+) {
+    for ev in evr_gamepad.read() {
+        // we only care about connection events
+        let GamepadEvent::Connection(ev_conn) = ev else {
+            continue;
+        };
+        match &ev_conn.connection {
+            GamepadConnection::Connected(info) => {
+                debug!(
+                    "New gamepad connected: {:?}, name: {}",
+                    ev_conn.gamepad, info.name,
+                );
+                // if we don't have any gamepad yet, use this one
+                if my_gamepad.is_none() {
+                    commands.insert_resource(MyGamepad(ev_conn.gamepad));
+                }
+            }
+            GamepadConnection::Disconnected => {
+                debug!("Lost connection with gamepad: {:?}", ev_conn.gamepad);
+                // if it's the one we previously used for the player, remove it:
+                if let Some(MyGamepad(old_id)) = my_gamepad.as_deref() {
+                    if *old_id == ev_conn.gamepad {
+                        commands.remove_resource::<MyGamepad>();
+                    }
+                }
+            }
+        }
     }
 }
