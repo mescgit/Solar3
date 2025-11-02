@@ -1,5 +1,5 @@
-use bevy::prelude::*;
 use bevy::color::LinearRgba;
+use bevy::prelude::*;
 use rand::{Rng, RngCore, SeedableRng};
 use std::collections::{HashMap, HashSet};
 
@@ -85,8 +85,14 @@ impl Plugin for SimPlugin {
         app.init_resource::<SimSettings>()
             .init_resource::<SimStats>()
             .init_resource::<Mission>()
-            .insert_resource(TrailSpawnTimer(Timer::from_seconds(0.05, TimerMode::Repeating)))
-            .insert_resource(HazardSpawnTimer(Timer::from_seconds(15.0, TimerMode::Repeating)))
+            .insert_resource(TrailSpawnTimer(Timer::from_seconds(
+                0.05,
+                TimerMode::Repeating,
+            )))
+            .insert_resource(HazardSpawnTimer(Timer::from_seconds(
+                15.0,
+                TimerMode::Repeating,
+            )))
             .add_event::<SpawnBurst>()
             .add_event::<PlayerDied>()
             .add_event::<ResetEvent>()
@@ -443,7 +449,11 @@ impl Default for TreeState {
     }
 }
 
-pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>, settings: SimSettings) {
+fn spawn_initial_bodies_inner(
+    commands: &mut Commands,
+    stats: &mut SimStats,
+    settings: &SimSettings,
+) {
     commands.insert_resource(TreeState::default());
 
     let mut rng: Box<dyn RngCore> = if settings.deterministic {
@@ -464,7 +474,9 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
                     acc: Vec2::ZERO,
                     class,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(m) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(m),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class.color(settings.color_palette),
@@ -492,7 +504,9 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
                             acc: Vec2::ZERO,
                             class,
                         },
-                        SmoothSize { target_radius: Class::radius_for_mass(mass) },
+                        SmoothSize {
+                            target_radius: Class::radius_for_mass(mass),
+                        },
                         SpriteBundle {
                             sprite: Sprite {
                                 color: class.color(settings.color_palette),
@@ -524,7 +538,9 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
                     acc: Vec2::ZERO,
                     class: class1,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(m1) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(m1),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class1.color(settings.color_palette),
@@ -543,7 +559,9 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
                     acc: Vec2::ZERO,
                     class: class2,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(m2) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(m2),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class2.color(settings.color_palette),
@@ -557,7 +575,10 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
         }
         SystemType::Cluster => {
             for _ in 0..50 {
-                let pos = Vec2::new(rng.gen_range(-1000.0..1000.0), rng.gen_range(-1000.0..1000.0));
+                let pos = Vec2::new(
+                    rng.gen_range(-1000.0..1000.0),
+                    rng.gen_range(-1000.0..1000.0),
+                );
                 let mass = rng.gen_range(1000.0..50000.0);
                 let class = Class::from_mass(mass);
                 commands.spawn((
@@ -567,7 +588,9 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
                         acc: Vec2::ZERO,
                         class,
                     },
-                    SmoothSize { target_radius: Class::radius_for_mass(mass) },
+                    SmoothSize {
+                        target_radius: Class::radius_for_mass(mass),
+                    },
                     SpriteBundle {
                         sprite: Sprite {
                             color: class.color(settings.color_palette),
@@ -584,6 +607,14 @@ pub fn spawn_initial_bodies(mut commands: Commands, mut stats: ResMut<SimStats>,
     }
 }
 
+pub fn spawn_initial_bodies(
+    mut commands: Commands,
+    mut stats: ResMut<SimStats>,
+    settings: Res<SimSettings>,
+) {
+    spawn_initial_bodies_inner(&mut commands, stats.as_mut(), &settings);
+}
+
 pub fn spawn_player(mut commands: Commands) {
     let mass = 80.0;
     let class = Class::from_mass(mass);
@@ -594,7 +625,9 @@ pub fn spawn_player(mut commands: Commands) {
             acc: Vec2::ZERO,
             class,
         },
-        SmoothSize { target_radius: Class::radius_for_mass(mass) },
+        SmoothSize {
+            target_radius: Class::radius_for_mass(mass),
+        },
         Player {
             thrust: 380.0,
             torque: 0.0,
@@ -760,7 +793,15 @@ fn resolve_collisions(
     hash: Local<SpatialHash>,
 ) {
     let neighbor_offsets = [
-        (-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1),
+        (-1, -1),
+        (0, -1),
+        (1, -1),
+        (-1, 0),
+        (0, 0),
+        (1, 0),
+        (-1, 1),
+        (0, 1),
+        (1, 1),
     ];
     let radius_of = |b: &Body| Class::radius_for_mass(b.mass);
 
@@ -793,7 +834,9 @@ fn resolve_collisions(
                         if removed.contains(&a) {
                             continue;
                         }
-                        let Ok((ea, ba, ta, pla)) = q_read.get(a) else { continue; };
+                        let Ok((ea, ba, ta, pla)) = q_read.get(a) else {
+                            continue;
+                        };
                         let pa = ta.translation.truncate();
                         let ra = radius_of(ba);
 
@@ -801,7 +844,9 @@ fn resolve_collisions(
                             if a == b || removed.contains(&b) {
                                 continue;
                             }
-                            let Ok((eb, bb, tb, plb)) = q_read.get(b) else { continue; };
+                            let Ok((eb, bb, tb, plb)) = q_read.get(b) else {
+                                continue;
+                            };
                             let pb = tb.translation.truncate();
                             let rb = radius_of(bb);
 
@@ -827,7 +872,11 @@ fn resolve_collisions(
                                 let new_mass = (ba.mass * bias + bb.mass).max(ba.mass);
                                 let new_vel = (ba.vel * ba.mass + bb.vel * bb.mass) / total;
                                 merges.push(Merge {
-                                    winner: ea, loser: eb, new_mass, new_vel, player_died: plb.is_some(),
+                                    winner: ea,
+                                    loser: eb,
+                                    new_mass,
+                                    new_vel,
+                                    player_died: plb.is_some(),
                                 });
                                 ev_absorbed.send(BodyAbsorbed {
                                     winner: ea,
@@ -840,7 +889,11 @@ fn resolve_collisions(
                                 let new_mass = (bb.mass * bias + ba.mass).max(bb.mass);
                                 let new_vel = (ba.vel * ba.mass + bb.vel * bb.mass) / total;
                                 merges.push(Merge {
-                                    winner: eb, loser: ea, new_mass, new_vel, player_died: pla.is_some(),
+                                    winner: eb,
+                                    loser: ea,
+                                    new_mass,
+                                    new_vel,
+                                    player_died: pla.is_some(),
                                 });
                                 ev_absorbed.send(BodyAbsorbed {
                                     winner: eb,
@@ -903,7 +956,9 @@ fn resolve_collisions(
                         if processed.contains(&a) {
                             continue;
                         }
-                        let Ok((ea, ba, ta, _)) = q_read.get(a) else { continue; };
+                        let Ok((ea, ba, ta, _)) = q_read.get(a) else {
+                            continue;
+                        };
                         let pa = ta.translation.truncate();
                         let ra = radius_of(ba);
 
@@ -911,7 +966,9 @@ fn resolve_collisions(
                             if a == b || processed.contains(&b) {
                                 continue;
                             }
-                            let Ok((eb, bb, tb, _)) = q_read.get(b) else { continue; };
+                            let Ok((eb, bb, tb, _)) = q_read.get(b) else {
+                                continue;
+                            };
                             let pb = tb.translation.truncate();
                             let rb = radius_of(bb);
 
@@ -936,14 +993,24 @@ fn resolve_collisions(
                                 let vbt = vb.dot(tangent);
 
                                 let e = settings.restitution;
-                                let van_new = (e * mb * (vbn - van) + ma * van + mb * vbn) / (ma + mb);
-                                let vbn_new = (e * ma * (van - vbn) + ma * van + mb * vbn) / (ma + mb);
+                                let van_new =
+                                    (e * mb * (vbn - van) + ma * van + mb * vbn) / (ma + mb);
+                                let vbn_new =
+                                    (e * ma * (van - vbn) + ma * van + mb * vbn) / (ma + mb);
 
                                 let va_new = van_new * normal + vat * tangent;
                                 let vb_new = vbn_new * normal + vbt * tangent;
 
-                                updates.push(ElasticResult { entity: ea, new_vel: va_new, new_pos: pa_new });
-                                updates.push(ElasticResult { entity: eb, new_vel: vb_new, new_pos: pb_new });
+                                updates.push(ElasticResult {
+                                    entity: ea,
+                                    new_vel: va_new,
+                                    new_pos: pa_new,
+                                });
+                                updates.push(ElasticResult {
+                                    entity: eb,
+                                    new_vel: vb_new,
+                                    new_pos: pb_new,
+                                });
 
                                 processed.insert(ea);
                                 processed.insert(eb);
@@ -966,14 +1033,21 @@ fn resolve_collisions(
     }
 }
 
-fn update_render(mut q: Query<(&Body, &mut Sprite, &mut SmoothSize)>, time: Res<Time>, settings: Res<SimSettings>) {
+fn update_render(
+    mut q: Query<(&Body, &mut Sprite, &mut SmoothSize)>,
+    time: Res<Time>,
+    settings: Res<SimSettings>,
+) {
     for (b, mut s, mut smooth_size) in &mut q {
         smooth_size.target_radius = Class::radius_for_mass(b.mass);
-        
-        let current_size = s.custom_size.unwrap_or(Vec2::splat(smooth_size.target_radius)).x;
+
+        let current_size = s
+            .custom_size
+            .unwrap_or(Vec2::splat(smooth_size.target_radius))
+            .x;
         let lerp_factor = (1.0 - (-5.0 * time.delta_seconds()).exp()).clamp(0.0, 1.0);
         let new_size = current_size + (smooth_size.target_radius - current_size) * lerp_factor;
-        
+
         s.custom_size = Some(Vec2::splat(new_size));
 
         let glow = b.class.glow();
@@ -1022,7 +1096,9 @@ fn spawn_bursts(
                     acc: Vec2::ZERO,
                     class,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(mass) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(mass),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class.color(settings.color_palette),
@@ -1056,7 +1132,7 @@ fn handle_reset(
     stats.0 = 0;
 
     *settings = SimSettings::from_scenario(settings.scenario);
-    spawn_initial_bodies(commands, stats, settings.clone());
+    spawn_initial_bodies_inner(&mut commands, stats.as_mut(), &*settings);
 }
 
 fn spawn_trails(
@@ -1072,7 +1148,8 @@ fn spawn_trails(
     }
 
     for (t, b) in &body_q {
-        if b.vel.length_squared() > 100.0 { // Only spawn for moving bodies
+        if b.vel.length_squared() > 100.0 {
+            // Only spawn for moving bodies
             commands.spawn((
                 SpriteBundle {
                     transform: Transform::from_translation(t.translation),
@@ -1134,8 +1211,7 @@ fn update_score(
     if let Ok((player_entity, mut player)) = player_q.get_single_mut() {
         for ev in ev_absorbed.read() {
             if ev.winner == player_entity {
-                let score_gain =
-                    (ev.loser_mass * ev.loser_vel.length()) / ev.loser_class.rarity();
+                let score_gain = (ev.loser_mass * ev.loser_vel.length()) / ev.loser_class.rarity();
                 player.score += score_gain;
             }
         }
@@ -1165,19 +1241,24 @@ fn spawn_hazards(
     let hazard_type = rng.gen_range(0..3);
 
     match hazard_type {
-        0 => { // Rogue Star
-            let pos = player_pos + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero() * 2000.0;
+        0 => {
+            // Rogue Star
+            let pos = player_pos
+                + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero()
+                    * 2000.0;
             let vel = (player_pos - pos).normalize() * 300.0;
             let mass = 100_000.0;
             let class = Class::from_mass(mass);
             commands.spawn((
                 Body {
-                    mass, 
-                    vel, 
-                    acc: Vec2::ZERO, 
-                    class 
+                    mass,
+                    vel,
+                    acc: Vec2::ZERO,
+                    class,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(mass) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(mass),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class.color(settings.color_palette),
@@ -1189,18 +1270,23 @@ fn spawn_hazards(
                 Hazard,
             ));
         }
-        1 => { // Micro BH
-            let pos = player_pos + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero() * 1500.0;
+        1 => {
+            // Micro BH
+            let pos = player_pos
+                + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero()
+                    * 1500.0;
             let mass = 1_500_000.0;
             let class = Class::from_mass(mass);
             commands.spawn((
                 Body {
-                    mass, 
-                    vel: Vec2::ZERO, 
-                    acc: Vec2::ZERO, 
-                    class 
+                    mass,
+                    vel: Vec2::ZERO,
+                    acc: Vec2::ZERO,
+                    class,
                 },
-                SmoothSize { target_radius: Class::radius_for_mass(mass) },
+                SmoothSize {
+                    target_radius: Class::radius_for_mass(mass),
+                },
                 SpriteBundle {
                     sprite: Sprite {
                         color: class.color(settings.color_palette),
@@ -1212,8 +1298,11 @@ fn spawn_hazards(
                 Hazard,
             ));
         }
-        2 => { // Debris Storm
-            let pos = player_pos + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero() * 3000.0;
+        2 => {
+            // Debris Storm
+            let pos = player_pos
+                + Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize_or_zero()
+                    * 3000.0;
             ev_spawn.send(SpawnBurst {
                 center: pos,
                 radius: 200.0,
@@ -1226,10 +1315,7 @@ fn spawn_hazards(
     }
 }
 
-fn update_mission(
-    mut mission: ResMut<Mission>,
-    time: Res<Time>,
-) {
+fn update_mission(mut mission: ResMut<Mission>, time: Res<Time>) {
     if mission.completed {
         return;
     }

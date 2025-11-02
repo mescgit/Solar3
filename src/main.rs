@@ -1,15 +1,15 @@
-mod sim;
-mod quadtree;
-mod ui;
 mod input;
+mod quadtree;
+mod sim;
+mod ui;
 
-use bevy::prelude::*;
 use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::core_pipeline::tonemapping::Tonemapping;
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, EntityCountDiagnosticsPlugin};
-use sim::{SimPlugin, SimState, AppState};
-use ui::UiPlugin;
+use bevy::diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
+use bevy::prelude::*;
 use input::InputPlugin;
+use sim::{AppState, SimPlugin, SimState};
+use ui::UiPlugin;
 
 fn main() {
     App::new()
@@ -19,16 +19,14 @@ fn main() {
         .init_state::<AppState>()
         .add_plugins(FrameTimeDiagnosticsPlugin)
         .add_plugins(EntityCountDiagnosticsPlugin)
-        .add_plugins(
-            DefaultPlugins.set(WindowPlugin {
-                primary_window: Some(Window {
-                    title: "solar2-rs — n-body gravity".into(),
-                    resolution: (1400., 900.).into(),
-                    ..default()
-                }),
+        .add_plugins(DefaultPlugins.set(WindowPlugin {
+            primary_window: Some(Window {
+                title: "solar2-rs — n-body gravity".into(),
+                resolution: (1400., 900.).into(),
                 ..default()
-            })
-        )
+            }),
+            ..default()
+        }))
         .add_plugins((SimPlugin, UiPlugin, InputPlugin))
         .add_systems(Startup, setup_camera)
         .run();

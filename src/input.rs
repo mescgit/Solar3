@@ -1,14 +1,25 @@
-use bevy::prelude::*;
+use crate::sim::{Body, Player, ResetEvent, SimSettings, SpawnBurst};
+use crate::MainCamera;
 use bevy::input::mouse::{MouseButtonInput, MouseWheel};
 use bevy::input::ButtonState; // needed in Bevy 0.14
-use crate::sim::{SpawnBurst, SimSettings, Player, Body, ResetEvent};
-use crate::MainCamera;
+use bevy::prelude::*;
 
 pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(DragState::default())
-           .add_systems(Update, (camera_controls, drag_spawn, player_thrust, pause_toggle, follow_toggle, time_scale_toggle, reset_trigger, help_toggle));
+        app.insert_resource(DragState::default()).add_systems(
+            Update,
+            (
+                camera_controls,
+                drag_spawn,
+                player_thrust,
+                pause_toggle,
+                follow_toggle,
+                time_scale_toggle,
+                reset_trigger,
+                help_toggle,
+            ),
+        );
     }
 }
 
@@ -95,8 +106,12 @@ fn drag_spawn(
     _settings: Res<SimSettings>,
 ) {
     let win = windows.single();
-    let Some(cursor) = win.cursor_position() else { return; };
-    let Some(world) = window_cursor_world(win, cursor, q_cam.single()) else { return; };
+    let Some(cursor) = win.cursor_position() else {
+        return;
+    };
+    let Some(world) = window_cursor_world(win, cursor, q_cam.single()) else {
+        return;
+    };
 
     for ev in mousebtn_evr.read() {
         match ev.state {
@@ -135,13 +150,25 @@ fn player_thrust(
     if let Ok((mut b, _t, _p)) = q.get_single_mut() {
         let mut dir = Vec2::ZERO;
 
-        if keys.pressed(KeyCode::ArrowUp)   || keys.pressed(KeyCode::KeyW) { dir.y += 1.0; }
-        if keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyS) { dir.y -= 1.0; }
-        if keys.pressed(KeyCode::ArrowLeft) || keys.pressed(KeyCode::KeyA) { dir.x -= 1.0; }
-        if keys.pressed(KeyCode::ArrowRight)|| keys.pressed(KeyCode::KeyD) { dir.x += 1.0; }
+        if keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW) {
+            dir.y += 1.0;
+        }
+        if keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyS) {
+            dir.y -= 1.0;
+        }
+        if keys.pressed(KeyCode::ArrowLeft) || keys.pressed(KeyCode::KeyA) {
+            dir.x -= 1.0;
+        }
+        if keys.pressed(KeyCode::ArrowRight) || keys.pressed(KeyCode::KeyD) {
+            dir.x += 1.0;
+        }
 
         if dir != Vec2::ZERO {
-            let boost = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) { 1.75 } else { 1.0 };
+            let boost = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
+                1.75
+            } else {
+                1.0
+            };
             let acc = dir.normalize() * 380.0 * boost / b.mass.max(1.0);
             b.vel += acc * dt;
         }
