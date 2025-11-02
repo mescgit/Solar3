@@ -6,12 +6,35 @@ use bevy::input::ButtonState; // needed in Bevy 0.14
 use bevy::prelude::*;
 
 #[derive(Resource)]
+pub struct Keybinds {
+    pub up: KeyCode,
+    pub down: KeyCode,
+    pub left: KeyCode,
+    pub right: KeyCode,
+    pub boost: KeyCode,
+}
+
+impl Default for Keybinds {
+    fn default() -> Self {
+        Self {
+            up: KeyCode::ArrowUp,
+            down: KeyCode::ArrowDown,
+            left: KeyCode::ArrowLeft,
+            right: KeyCode::ArrowRight,
+            boost: KeyCode::ShiftLeft,
+        }
+    }
+}
+
+#[derive(Resource)]
 struct MyGamepad(Gamepad);
 
 pub struct InputPlugin;
 impl Plugin for InputPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(DragState::default()).add_systems(
+        app.init_resource::<Keybinds>()
+            .insert_resource(DragState::default())
+            .add_systems(
             Update,
             (
                 gamepad_connections,
@@ -154,25 +177,26 @@ fn player_thrust(
     my_gamepad: Option<Res<MyGamepad>>,
     axes: Res<Axis<GamepadAxis>>,
     buttons: Res<ButtonInput<GamepadButton>>,
+    keybinds: Res<Keybinds>,
 ) {
     let dt = time.delta_seconds();
     if let Ok(mut player_body) = players.get_single_mut() {
         let mut dir = Vec2::ZERO;
 
-        if keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW) {
+        if keys.pressed(keybinds.up) {
             dir.y += 1.0;
         }
-        if keys.pressed(KeyCode::ArrowDown) || keys.pressed(KeyCode::KeyS) {
+        if keys.pressed(keybinds.down) {
             dir.y -= 1.0;
         }
-        if keys.pressed(KeyCode::ArrowLeft) || keys.pressed(KeyCode::KeyA) {
+        if keys.pressed(keybinds.left) {
             dir.x -= 1.0;
         }
-        if keys.pressed(KeyCode::ArrowRight) || keys.pressed(KeyCode::KeyD) {
+        if keys.pressed(keybinds.right) {
             dir.x += 1.0;
         }
 
-        let mut boost = if keys.pressed(KeyCode::ShiftLeft) || keys.pressed(KeyCode::ShiftRight) {
+        let mut boost = if keys.pressed(keybinds.boost) {
             1.75
         } else {
             1.0
