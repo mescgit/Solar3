@@ -1,15 +1,10 @@
-mod input;
-mod quadtree;
-mod sim;
-mod ui;
+mod domain;
 
 use bevy::core_pipeline::bloom::BloomSettings;
 use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
-use input::InputPlugin;
-use sim::SimPlugin;
-use ui::UiPlugin;
+use domain::{InputPlugin, SimPlugin, UiPlugin};
 
 fn main() {
     App::new()
@@ -25,8 +20,8 @@ fn main() {
             }),
             ..default()
         }))
-        .init_state::<sim::SimState>()
-        .init_state::<sim::AppState>()
+        .init_state::<domain::SimState>()
+        .init_state::<domain::AppState>()
         .add_plugins((SimPlugin, UiPlugin, InputPlugin))
         .add_systems(Startup, setup_camera)
         .run();

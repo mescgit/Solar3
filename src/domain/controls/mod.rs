@@ -1,4 +1,4 @@
-use crate::sim::{Body, Player, ResetEvent, SimSettings, SpawnBurst};
+use crate::domain::simulation::{Body, Player, ResetEvent, SimSettings, SpawnBurst};
 use crate::MainCamera;
 use bevy::input::mouse::{MouseButtonInput, MouseWheel};
 use bevy::input::ButtonState; // needed in Bevy 0.14

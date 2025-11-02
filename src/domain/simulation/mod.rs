@@ -3,7 +3,9 @@ use bevy::prelude::*;
 use rand::{Rng, RngCore, SeedableRng};
 use std::collections::{HashMap, HashSet};
 
-use crate::quadtree::{Quad, QuadTree};
+mod quadtree;
+
+use quadtree::{Quad, QuadTree};
 
 #[derive(States, Debug, Clone, PartialEq, Eq, Hash, Default)]
 pub enum AppState {

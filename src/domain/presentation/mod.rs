@@ -4,7 +4,7 @@ use bevy::diagnostic::{
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 
-use crate::sim::{
+use crate::domain::simulation::{
     AppState, Body, CollisionMode, ColorPalette, Mission, Objective, Player, ResetEvent, Scenario,
     SimSettings, SimState, SimStats, SystemType,
 };
