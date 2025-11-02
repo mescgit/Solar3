@@ -1,0 +1,149 @@
+Solar2-rs — Game Overview
+Version Target: v1.0 (Playable Sandbox Simulation + Progression Loop)
+Genre: Physics-driven sandbox / evolution sim / ambient experience
+🎯 High-Level Goal
+
+Solar2-rs is an open-ended physics sandbox inspired by Solar 2 — a game about growth through gravity.
+
+The player begins as a small rock drifting through a living galaxy and evolves through absorption, collisions, and gravity-based growth into a planet, star, and eventually a black hole.
+The universe itself is fully simulated using an N-body gravity solver (Barnes-Hut approximation for performance).
+Each level of evolution unlocks new mechanics and challenges, but the core goal remains constant:
+
+“Grow, survive, and witness the physics of creation.”
+
+🧠 Core Loop
+
+Move — Control your body’s trajectory using thrust, gravity, and momentum.
+
+Absorb — Collide with smaller bodies to gain mass.
+
+Evolve — Reach mass thresholds to evolve into new celestial classes (Planet → Star → Black Hole).
+
+Adapt — Avoid dangerous collisions and environmental hazards that can destroy or destabilize you.
+
+Explore — Spawn new systems, trigger chain reactions, and watch gravity sculpt complex motion.
+
+Optional objectives (missions/scenarios) guide the player through increasingly chaotic simulations, but self-directed discovery is the heart of the experience.
+
+⚙️ Systems Summary
+1. Physics
+
+Barnes-Hut quadtree gravity approximation
+
+Stable leapfrog integration
+
+Collision resolution:
+
+Absorption (default)
+
+Elastic (for debug/chaos modes)
+
+Adaptive timestep for stability under extreme mass ratios
+
+2. Body Classes
+Class	Approx. Mass Range	Behavior	Visuals
+Asteroid	< 500	passive, easily absorbed	pale blue/white
+Planet	500–20k	medium gravity, sustains orbits	teal/cyan
+Star	20k–1M	emits strong gravity, can destabilize belts	yellow/orange
+Black Hole	>1M	extreme pull, absorbs all nearby	black with faint halo
+
+3. Player
+
+Controlled via WASD / Arrows / Shift for boost
+
+Can absorb smaller bodies
+
+Grows class as it gains mass
+
+Death: colliding with a larger body or star
+
+4. Universe Generation
+
+Procedural ring systems and clusters
+
+Adjustable density, seed, and system scale
+
+“Scenario” presets: calm, chaotic, twin-star, cluster, debris storm
+
+5. Visuals & UI
+
+Particle trails behind moving bodies
+
+Additive bloom/glow for luminous classes
+
+HUD:
+
+Body count, player mass/class
+
+Simulation rate, FPS
+
+Controls summary
+
+Camera:
+
+Follow player (toggle)
+
+Smooth zoom to cursor
+
+Right-drag pan
+
+6. Progression & Objectives
+
+Evolution milestones trigger:
+
+Class transitions
+
+Visual FX + sound cues
+
+Optional “missions” (grow to X, survive Y seconds)
+
+Win/Lose conditions:
+
+Win: reach target mass or survive time limit
+
+Lose: destroyed or merged by larger body
+
+7. Performance Goals
+
+Target: 10,000 bodies @ 60 FPS (RTX 4090)
+
+Average playtest: 1,000–2,000 bodies at full speed
+
+Optimizations:
+
+Spatial hash for collisions
+
+Barnes-Hut for gravity
+
+Batched rendering
+
+🧩 Design Pillars
+
+Emergent Order from Chaos — simple rules, complex beauty.
+
+Player as Participant, not Commander — you are one body among many.
+
+No Menu-Driven Progression — evolution is physical, not numerical.
+
+Sandbox First — everything reacts, everything persists.
+
+Elegance in Simulation — every mechanic is a direct expression of physics.
+
+🚀 Future Expansion (Post-1.0)
+
+Planet systems (moons, orbit capture)
+
+Procedural missions with dialogue
+
+Audio ambience (reactive sound design)
+
+GPU compute backend for massive-scale galaxies
+
+Save/load & replay system
+
+Steam/itch release with mod hooks
+
+Tagline:
+
+“You are gravity.
+Watch the universe build itself around you.”

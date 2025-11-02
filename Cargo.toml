@@ -1,0 +1,9 @@
+[package]
+name = "solar2-rs"
+version = "0.3.1"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.14", features = ["wayland", "bevy_asset", "bevy_winit"] }
+bevy_egui = "0.30"
+rand = "0.8"
