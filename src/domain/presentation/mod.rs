@@ -4,6 +4,7 @@ use bevy::diagnostic::{
 use bevy::prelude::*;
 use bevy_egui::{egui, EguiContexts, EguiPlugin};
 
+use crate::domain::controls::Keybinds;
 use crate::domain::simulation::{
     AppState, Body, CollisionMode, ColorPalette, Mission, Objective, Player, ResetEvent, Scenario,
     SimSettings, SimState, SimStats, SystemType,
@@ -26,7 +27,23 @@ fn ui_system(
     mut next_state: ResMut<NextState<SimState>>,
     diagnostics: Res<DiagnosticsStore>,
     mission: Res<Mission>,
+    mut keybinds: ResMut<Keybinds>,
+    mut rebinding_state: Local<Option<String>>,
 ) {
+    let mut pressed_key = None;
+    contexts.ctx_mut().input(|i| {
+        for event in &i.events {
+            if let egui::Event::Key {
+                key,
+                pressed: true,
+                ..
+            } = event
+            {
+                pressed_key = Some(*key);
+            }
+        }
+    });
+
     egui::Window::new("Settings").show(contexts.ctx_mut(), |ui| {
         ui.label(format!("Bodies: {}", stats.0));
         if let Some(fps) = diagnostics.get(&FrameTimeDiagnosticsPlugin::FPS) {
@@ -175,6 +192,46 @@ fn ui_system(
         } else {
             ui.add(egui::Slider::new(&mut settings.softening, 0.1..=20.0).text("Softening"));
         }
+
+        ui.separator();
+
+        ui.label("Keybinds");
+
+        let mut rebind_action = |ui: &mut egui::Ui, action: &str, key: &mut KeyCode| {
+            ui.horizontal(|ui| {
+                ui.label(action);
+                let button_text = if rebinding_state.as_deref() == Some(action) {
+                    "Press a key..."
+                } else {
+                    &format!("{:?}", key)
+                };
+                if ui.button(button_text).clicked() {
+                    *rebinding_state = Some(action.to_string());
+                }
+            });
+        };
+
+        rebind_action(ui, "Up", &mut keybinds.up);
+        rebind_action(ui, "Down", &mut keybinds.down);
+        rebind_action(ui, "Left", &mut keybinds.left);
+        rebind_action(ui, "Right", &mut keybinds.right);
+        rebind_action(ui, "Boost", &mut keybinds.boost);
+
+        if let Some(action) = rebinding_state.take() {
+            if let Some(key_code) = pressed_key {
+                let bevy_keycode = egui_to_bevy_keycode(key_code);
+                match action.as_str() {
+                    "Up" => keybinds.up = bevy_keycode,
+                    "Down" => keybinds.down = bevy_keycode,
+                    "Left" => keybinds.left = bevy_keycode,
+                    "Right" => keybinds.right = bevy_keycode,
+                    "Boost" => keybinds.boost = bevy_keycode,
+                    _ => {}
+                }
+            } else {
+                *rebinding_state = Some(action);
+            }
+        }
     });
 
     if settings.show_help {
@@ -221,4 +278,55 @@ fn game_over_ui(
             next_state.set(AppState::Playing);
         }
     });
+}
+
+fn egui_to_bevy_keycode(key: egui::Key) -> KeyCode {
+    match key {
+        egui::Key::A => KeyCode::KeyA,
+        egui::Key::B => KeyCode::KeyB,
+        egui::Key::C => KeyCode::KeyC,
+        egui::Key::D => KeyCode::KeyD,
+        egui::Key::E => KeyCode::KeyE,
+        egui::Key::F => KeyCode::KeyF,
+        egui::Key::G => KeyCode::KeyG,
+        egui::Key::H => KeyCode::KeyH,
+        egui::Key::I => KeyCode::KeyI,
+        egui::Key::J => KeyCode::KeyJ,
+        egui::Key::K => KeyCode::KeyK,
+        egui::Key::L => KeyCode::KeyL,
+        egui::Key::M => KeyCode::KeyM,
+        egui::Key::N => KeyCode::KeyN,
+        egui::Key::O => KeyCode::KeyO,
+        egui::Key::P => KeyCode::KeyP,
+        egui::Key::Q => KeyCode::KeyQ,
+        egui::Key::R => KeyCode::KeyR,
+        egui::Key::S => KeyCode::KeyS,
+        egui::Key::T => KeyCode::KeyT,
+        egui::Key::U => KeyCode::KeyU,
+        egui::Key::V => KeyCode::KeyV,
+        egui::Key::W => KeyCode::KeyW,
+        egui::Key::X => KeyCode::KeyX,
+        egui::Key::Y => KeyCode::KeyY,
+        egui::Key::Z => KeyCode::KeyZ,
+        egui::Key::Num0 => KeyCode::Digit0,
+        egui::Key::Num1 => KeyCode::Digit1,
+        egui::Key::Num2 => KeyCode::Digit2,
+        egui::Key::Num3 => KeyCode::Digit3,
+        egui::Key::Num4 => KeyCode::Digit4,
+        egui::Key::Num5 => KeyCode::Digit5,
+        egui::Key::Num6 => KeyCode::Digit6,
+        egui::Key::Num7 => KeyCode::Digit7,
+        egui::Key::Num8 => KeyCode::Digit8,
+        egui::Key::Num9 => KeyCode::Digit9,
+        egui::Key::ArrowUp => KeyCode::ArrowUp,
+        egui::Key::ArrowDown => KeyCode::ArrowDown,
+        egui::Key::ArrowLeft => KeyCode::ArrowLeft,
+        egui::Key::ArrowRight => KeyCode::ArrowRight,
+        egui::Key::Space => KeyCode::Space,
+        egui::Key::Enter => KeyCode::Enter,
+        egui::Key::Alt => KeyCode::AltLeft,
+        egui::Key::Control => KeyCode::ControlLeft,
+        egui::Key::Shift => KeyCode::ShiftLeft,
+        _ => KeyCode::Unidentified(bevy::input::keyboard::NativeKeyCode::Unidentified),
+    }
 }
