@@ -8,7 +8,7 @@ use bevy::core_pipeline::tonemapping::Tonemapping;
 use bevy::diagnostic::{EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
 use input::InputPlugin;
-use sim::{AppState, SimPlugin, SimState};
+use sim::SimPlugin;
 use ui::UiPlugin;
 
 fn main() {
@@ -25,6 +25,8 @@ fn main() {
             }),
             ..default()
         }))
+        .init_state::<sim::SimState>()
+        .init_state::<sim::AppState>()
         .add_plugins((SimPlugin, UiPlugin, InputPlugin))
         .add_systems(Startup, setup_camera)
         .run();

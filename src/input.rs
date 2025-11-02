@@ -18,6 +18,7 @@ impl Plugin for InputPlugin {
                 time_scale_toggle,
                 reset_trigger,
                 help_toggle,
+                diagnostics_toggle,
             ),
         );
     }
@@ -147,7 +148,7 @@ fn player_thrust(
     mut players: Query<&mut Body, With<Player>>,
 ) {
     let dt = time.delta_seconds();
-    if let Ok(mut body) = players.get_single_mut() {
+    if let Ok(mut player_body) = players.get_single_mut() {
         let mut dir = Vec2::ZERO;
 
         if keys.pressed(KeyCode::ArrowUp) || keys.pressed(KeyCode::KeyW) {
@@ -169,8 +170,8 @@ fn player_thrust(
             } else {
                 1.0
             };
-            let acc = dir.normalize() * 380.0 * boost / b.mass.max(1.0);
-            b.vel += acc * dt;
+            let acc = dir.normalize() * 380.0 * boost / player_body.mass.max(1.0);
+            player_body.vel += acc * dt;
         }
     }
 }
