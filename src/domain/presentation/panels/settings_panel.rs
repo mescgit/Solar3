@@ -1,6 +1,6 @@
 use crate::domain::simulation::{
-    Body, CollisionMode, ColorPalette, Mission, Objective, Player, Scenario, SimSettings,
-    SimState, SimStats, SystemType,
+    Body, CollisionMode, ColorPalette, Player, Scenario, SimSettings, SimState, SimStats,
+    SystemType,
 };
 use bevy::diagnostic::{DiagnosticsStore, FrameTimeDiagnosticsPlugin};
 use bevy::prelude::*;
@@ -14,7 +14,6 @@ pub fn show_settings_panel(
     player_q: &Query<(&Body, &Player)>,
     next_state: &mut NextState<SimState>,
     diagnostics: &DiagnosticsStore,
-    mission: &Mission,
 ) {
     egui::Window::new("Settings").show(ctx, |ui| {
         ui.label(format!("Bodies: {}", stats.0));
@@ -29,22 +28,6 @@ pub fn show_settings_panel(
                 "Player — Mass: {:.1}  Class: {:?}  Score: {:.0}",
                 body.mass, body.class, player.score
             ));
-        }
-
-        ui.separator();
-
-        if !mission.completed {
-            match mission.objective {
-                Objective::Survive => {
-                    ui.label(format!(
-                        "Survive: {:.0} / {:.0}s",
-                        mission.progress, mission.goal
-                    ));
-                }
-                _ => {}
-            }
-        } else {
-            ui.label("Mission Completed!");
         }
 
         ui.separator();
