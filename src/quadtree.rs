@@ -6,29 +6,42 @@ pub struct Quad {
     pub half_size: f32,
 }
 impl Quad {
-    pub fn new(center: Vec2, half_size: f32) -> Self { Self { center, half_size } }
+    pub fn new(center: Vec2, half_size: f32) -> Self {
+        Self { center, half_size }
+    }
     pub fn contains(&self, p: Vec2) -> bool {
-        (p.x >= self.center.x - self.half_size) &&
-        (p.x <= self.center.x + self.half_size) &&
-        (p.y >= self.center.y - self.half_size) &&
-        (p.y <= self.center.y + self.half_size)
+        (p.x >= self.center.x - self.half_size)
+            && (p.x <= self.center.x + self.half_size)
+            && (p.y >= self.center.y - self.half_size)
+            && (p.y <= self.center.y + self.half_size)
     }
     pub fn subdivide(&self) -> [Quad; 4] {
         let hs = self.half_size * 0.5;
         [
-            Quad::new(self.center + Vec2::new(-hs,  hs), hs), // NW
-            Quad::new(self.center + Vec2::new( hs,  hs), hs), // NE
+            Quad::new(self.center + Vec2::new(-hs, hs), hs), // NW
+            Quad::new(self.center + Vec2::new(hs, hs), hs),  // NE
             Quad::new(self.center + Vec2::new(-hs, -hs), hs), // SW
-            Quad::new(self.center + Vec2::new( hs, -hs), hs), // SE
+            Quad::new(self.center + Vec2::new(hs, -hs), hs), // SE
         ]
     }
-    pub fn size(&self) -> f32 { self.half_size * 2.0 }
+    pub fn size(&self) -> f32 {
+        self.half_size * 2.0
+    }
 }
 
 pub enum Node {
     Empty(Quad),
-    Leaf { quad: Quad, pos: Vec2, mass: f32 },
-    Internal { quad: Quad, mass: f32, com: Vec2, children: [Box<Node>; 4] },
+    Leaf {
+        quad: Quad,
+        pos: Vec2,
+        mass: f32,
+    },
+    Internal {
+        quad: Quad,
+        mass: f32,
+        com: Vec2,
+        children: [Box<Node>; 4],
+    },
 }
 
 pub struct QuadTree {
@@ -36,21 +49,38 @@ pub struct QuadTree {
 }
 
 impl QuadTree {
-    pub fn new(bounds: Quad) -> Self { Self { root: Box::new(Node::Empty(bounds)) } }
-    pub fn insert(&mut self, p: Vec2, mass: f32) { Self::insert_node(&mut self.root, p, mass); }
+    pub fn new(bounds: Quad) -> Self {
+        Self {
+            root: Box::new(Node::Empty(bounds)),
+        }
+    }
+    pub fn insert(&mut self, p: Vec2, mass: f32) {
+        Self::insert_node(&mut self.root, p, mass);
+    }
 
     fn insert_node(node: &mut Box<Node>, p: Vec2, mass: f32) {
         match node.as_mut() {
             Node::Empty(q) => {
-                if !q.contains(p) { return; }
-                *node = Box::new(Node::Leaf { quad: *q, pos: p, mass });
+                if !q.contains(p) {
+                    return;
+                }
+                *node = Box::new(Node::Leaf {
+                    quad: *q,
+                    pos: p,
+                    mass,
+                });
             }
             Node::Leaf { quad, pos, mass: m } => {
                 let quads = quad.subdivide();
                 let mut children: [Box<Node>; 4] = quads.map(|q| Box::new(Node::Empty(q)));
                 Self::insert_node(&mut children[Self::child_index(*pos, *quad)], *pos, *m);
                 Self::insert_node(&mut children[Self::child_index(p, *quad)], p, mass);
-                *node = Box::new(Node::Internal { quad: *quad, mass: 0.0, com: Vec2::ZERO, children });
+                *node = Box::new(Node::Internal {
+                    quad: *quad,
+                    mass: 0.0,
+                    com: Vec2::ZERO,
+                    children,
+                });
             }
             Node::Internal { quad, children, .. } => {
                 let idx = Self::child_index(p, *quad);
@@ -70,7 +100,12 @@ impl QuadTree {
             match node {
                 Node::Empty(_) => (0.0, Vec2::ZERO),
                 Node::Leaf { mass, pos, .. } => (*mass, *pos),
-                Node::Internal { children, mass, com, .. } => {
+                Node::Internal {
+                    children,
+                    mass,
+                    com,
+                    ..
+                } => {
                     let mut total_m = 0.0;
                     let mut weighted = Vec2::ZERO;
                     for c in children.iter_mut() {
@@ -79,7 +114,11 @@ impl QuadTree {
                         weighted += p * m;
                     }
                     *mass = total_m.max(0.0);
-                    *com = if total_m > 0.0 { weighted / total_m } else { Vec2::ZERO };
+                    *com = if total_m > 0.0 {
+                        weighted / total_m
+                    } else {
+                        Vec2::ZERO
+                    };
                     (*mass, *com)
                 }
             }
@@ -109,18 +148,29 @@ impl QuadTree {
                 Node::Leaf { pos, mass, .. } => {
                     let r = *pos - p;
                     let dist2 = r.length_squared() + soft2;
-                    if dist2 == 0.0 { return Vec2::ZERO; }
+                    if dist2 == 0.0 {
+                        return Vec2::ZERO;
+                    }
                     let inv = 1.0 / dist2.sqrt().powi(3);
                     g * *mass * r * inv
                 }
-                Node::Internal { quad, mass, com, children } => {
-                    if *mass == 0.0 { return Vec2::ZERO; }
+                Node::Internal {
+                    quad,
+                    mass,
+                    com,
+                    children,
+                } => {
+                    if *mass == 0.0 {
+                        return Vec2::ZERO;
+                    }
                     let r = *com - p;
                     let d = r.length();
                     let s = quad.size();
                     if d == 0.0 {
                         let mut a = Vec2::ZERO;
-                        for c in children.iter() { a += walk(c, p, g, theta2, soft2); }
+                        for c in children.iter() {
+                            a += walk(c, p, g, theta2, soft2);
+                        }
                         return a;
                     }
                     if (s * s) / (d * d) < theta2 {
@@ -129,7 +179,9 @@ impl QuadTree {
                         return g * *mass * r * inv;
                     } else {
                         let mut a = Vec2::ZERO;
-                        for c in children.iter() { a += walk(c, p, g, theta2, soft2); }
+                        for c in children.iter() {
+                            a += walk(c, p, g, theta2, soft2);
+                        }
                         return a;
                     }
                 }
